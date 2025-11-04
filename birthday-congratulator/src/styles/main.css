@@ -1,0 +1,142 @@
+body {
+    background: #f4f6f8;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    display: flex;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
+
+.container {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+    padding: 28px 28px;
+    min-width: 320px;
+    max-width: 420px;
+    width: 90%;
+    position: relative;
+    overflow: visible;
+}
+
+h2 {
+    margin-top: 0;
+    color: #2b354f;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    color: #34405a;
+    font-size: 0.95em;
+}
+
+input[type="text"], input[type="number"], select {
+    width: 100%;
+    padding: 9px 12px;
+    font-size: 1em;
+    border-radius: 6px;
+    border: 1px solid #ccd6e7;
+    margin-top: 6px;
+    box-sizing: border-box;
+    outline: none;
+    background: #fff;
+}
+
+.row {
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+input[type="color"] {
+    width: 44px;
+    height: 36px;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid #ccd6e7;
+}
+
+.controls {
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+}
+
+.small {
+    flex:1;
+    font-size:0.92em;
+}
+
+button {
+    margin-top: 14px;
+    width: 100%;
+    padding: 11px 0;
+    background: linear-gradient(180deg,#4963e6,#3246b8);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1.03em;
+    cursor: pointer;
+    transition: transform .08s ease, box-shadow .08s ease;
+}
+
+button:active { transform: translateY(1px); }
+
+.result {
+    margin-top: 18px;
+    padding: 14px 12px;
+    background: #fafafa;
+    border-radius: 8px;
+    color: #303952;
+    text-align: center;
+    font-size: 1.05em;
+    box-shadow: 0 2px 6px rgba(80,120,200,0.04);
+    min-height:48px;
+}
+
+.preview {
+    margin-top:10px;
+    font-size:0.95em;
+    color:#47526a;
+    min-height:18px;
+}
+
+.muted { color:#7b8798; font-size:0.9em; margin-top:6px; }
+
+/* confetti */
+.confetti {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+    z-index: 50;
+}
+
+.confetti-piece {
+    position: absolute;
+    width: 10px;
+    height: 14px;
+    opacity: 0.95;
+    transform-origin: center;
+    will-change: transform, top, left;
+    animation: fall linear forwards;
+    border-radius:2px;
+}
+
+@keyframes fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity:1; }
+    100% { transform: translateY(110vh) rotate(540deg); opacity:0.9; }
+}
+
+/* cake pulse */
+.cake {
+    display:inline-block;
+    transform-origin:center;
+    transition: transform .2s ease;
+    font-size:1.1em;
+}
+
+.cake.pulse { transform: scale(1.18); }

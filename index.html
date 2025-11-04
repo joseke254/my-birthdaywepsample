@@ -1,0 +1,356 @@
+// ...existing code...
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Congratulate Birthday!</title>
+    <style>
+        body {
+            background: #f4f6f8;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+        }
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            padding: 28px 28px;
+            min-width: 320px;
+            max-width: 420px;
+            width: 90%;
+            position: relative;
+            overflow: visible;
+        }
+        h2 {
+            margin-top: 0;
+            color: #2b354f;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            color: #34405a;
+            font-size: 0.95em;
+        }
+        input[type="text"], input[type="number"], select {
+            width: 100%;
+            padding: 9px 12px;
+            font-size: 1em;
+            border-radius: 6px;
+            border: 1px solid #ccd6e7;
+            margin-top: 6px;
+            box-sizing: border-box;
+            outline: none;
+            background: #fff;
+        }
+        .row {
+            display:flex;
+            gap:8px;
+            align-items:center;
+        }
+        input[type="color"] {
+            width: 44px;
+            height: 36px;
+            padding: 0;
+            border-radius: 6px;
+            border: 1px solid #ccd6e7;
+        }
+        .controls {
+            display:flex;
+            gap:8px;
+            margin-top:8px;
+        }
+        .small {
+            flex:1;
+            font-size:0.92em;
+        }
+        button {
+            margin-top: 14px;
+            width: 100%;
+            padding: 11px 0;
+            background: linear-gradient(180deg,#4963e6,#3246b8);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1.03em;
+            cursor: pointer;
+            transition: transform .08s ease, box-shadow .08s ease;
+        }
+        button:active { transform: translateY(1px); }
+        .result {
+            margin-top: 18px;
+            padding: 14px 12px;
+            background: #fafafa;
+            border-radius: 8px;
+            color: #303952;
+            text-align: center;
+            font-size: 1.05em;
+            box-shadow: 0 2px 6px rgba(80,120,200,0.04);
+            min-height:48px;
+        }
+        .preview {
+            margin-top:10px;
+            font-size:0.95em;
+            color:#47526a;
+            min-height:18px;
+        }
+        .muted { color:#7b8798; font-size:0.9em; margin-top:6px; }
+        /* confetti */
+        .confetti {
+            pointer-events: none;
+            position: absolute;
+            inset: 0;
+            overflow: visible;
+            z-index: 50;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 14px;
+            opacity: 0.95;
+            transform-origin: center;
+            will-change: transform, top, left;
+            animation: fall linear forwards;
+            border-radius:2px;
+        }
+        @keyframes fall {
+            0% { transform: translateY(-10vh) rotate(0deg); opacity:1; }
+            100% { transform: translateY(110vh) rotate(540deg); opacity:0.9; }
+        }
+        /* cake pulse */
+        .cake {
+            display:inline-block;
+            transform-origin:center;
+            transition: transform .2s ease;
+            font-size:1.1em;
+        }
+        .cake.pulse { transform: scale(1.18); }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h2>Birthday Congratulator</h2>
+        <form id="birthdayForm" autocomplete="off">
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" placeholder="e.g. Alex" required>
+
+            <label for="age">Your Age:</label>
+            <input type="number" id="age" min="1" max="150" placeholder="e.g. 30" required>
+
+            <div class="controls">
+                <div class="small">
+                    <label for="emoji">Emoji:</label>
+                    <select id="emoji" aria-label="celebration emoji">
+                        <option value="🎂">🎂 Cake</option>
+                        <option value="🎉">🎉 Party</option>
+                        <option value="🎈">🎈 Balloon</option>
+                        <option value="🎁">🎁 Gift</option>
+                        <option value="🥳">🥳 Party Face</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="color">Theme:</label>
+                    <input type="color" id="color" title="Pick a highlight color" value="#4963e6">
+                </div>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+                <label style="flex:1;"><input type="checkbox" id="sound" checked> Play sound</label>
+                <label style="flex:1;"><input type="checkbox" id="save" checked> Remember me</label>
+            </div>
+
+            <button type="submit" id="submitBtn">Congratulate Me!</button>
+        </form>
+
+        <div class="preview muted" id="livePreview">Fill the form to see a live preview.</div>
+
+        <div id="result" class="result" style="display:none;"></div>
+
+        <div class="confetti" id="confettiContainer" aria-hidden="true"></div>
+    </div>
+
+    <script>
+        // ...existing code...
+        const form = document.getElementById('birthdayForm');
+        const nameInput = document.getElementById('name');
+        const ageInput = document.getElementById('age');
+        const resultDiv = document.getElementById('result');
+        const preview = document.getElementById('livePreview');
+        const emojiSel = document.getElementById('emoji');
+        const colorPicker = document.getElementById('color');
+        const confettiContainer = document.getElementById('confettiContainer');
+        const soundCheckbox = document.getElementById('sound');
+        const saveCheckbox = document.getElementById('save');
+
+        const compliments = [
+            "Have an amazing day!",
+            "Wishing you joy and laughter!",
+            "May your year be full of adventures!",
+            "Cheers to your best year yet!",
+            "Keep shining bright!"
+        ];
+
+        // restore saved
+        if(localStorage.getItem('birthday_name')) {
+            nameInput.value = localStorage.getItem('birthday_name');
+        }
+        if(localStorage.getItem('birthday_age')) {
+            ageInput.value = localStorage.getItem('birthday_age');
+        }
+        if(localStorage.getItem('birthday_color')) {
+            colorPicker.value = localStorage.getItem('birthday_color');
+            applyTheme(colorPicker.value);
+        }
+
+        // live preview
+        function updatePreview() {
+            const n = nameInput.value.trim() || 'Friend';
+            const a = ageInput.value.trim() ? `${ageInput.value.trim()} years old` : 'age to celebrate';
+            preview.textContent = `${emojiSel.value} Hello ${n} — ${a}. ${compliments[Math.floor(Math.random()*compliments.length)]}`;
+        }
+        nameInput.addEventListener('input', updatePreview);
+        ageInput.addEventListener('input', updatePreview);
+        emojiSel.addEventListener('change', updatePreview);
+
+        // theme color
+        function applyTheme(hex) {
+            document.documentElement.style.setProperty('--accent', hex);
+            // tweak button background
+            document.querySelectorAll('button').forEach(b => {
+                b.style.background = `linear-gradient(180deg, ${hex}, ${shade(hex,-20)})`;
+            });
+        }
+        colorPicker.addEventListener('input', () => {
+            applyTheme(colorPicker.value);
+            if(saveCheckbox.checked) localStorage.setItem('birthday_color', colorPicker.value);
+        });
+
+        // color helper
+        function shade(hex, percent) {
+            const f = parseInt(hex.slice(1),16);
+            const t = percent < 0 ? 0 : 255;
+            const p = Math.abs(percent)/100;
+            const R = Math.round((t - (f>>16)) * p) + (f>>16);
+            const G = Math.round((t - (f>>8 & 0x00FF)) * p) + (f>>8 & 0x00FF);
+            const B = Math.round((t - (f & 0x0000FF)) * p) + (f & 0x0000FF);
+            return `#${(R<<16 | G<<8 | B).toString(16).padStart(6,'0')}`;
+        }
+
+        // simple webaudio chime
+        function playChime() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const o = ctx.createOscillator();
+                const g = ctx.createGain();
+                o.type = 'sine';
+                o.frequency.setValueAtTime(880, ctx.currentTime);
+                g.gain.setValueAtTime(0.0001, ctx.currentTime);
+                g.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+                o.connect(g); g.connect(ctx.destination);
+                o.start();
+                o.frequency.linearRampToValueAtTime(660, ctx.currentTime+0.12);
+                g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+0.7);
+                o.stop(ctx.currentTime+0.75);
+            } catch(e) { /* audio not available */ }
+        }
+
+        // confetti generator
+        function burstConfetti(count=18) {
+            const bounds = confettiContainer.getBoundingClientRect();
+            for(let i=0;i<count;i++){
+                const el = document.createElement('div');
+                el.className = 'confetti-piece';
+                const w = 8 + Math.random()*12;
+                const h = 10 + Math.random()*18;
+                el.style.width = w + 'px';
+                el.style.height = h + 'px';
+                el.style.left = (Math.random()*100) + '%';
+                el.style.top = (-20 - Math.random()*10) + 'px';
+                el.style.background = randomColor();
+                el.style.animationDuration = (2.2 + Math.random()*1.4) + 's';
+                el.style.transform = `rotate(${Math.random()*360}deg)`;
+                confettiContainer.appendChild(el);
+                // remove after animation
+                setTimeout(()=> el.remove(), 4000 + (Math.random()*1000));
+            }
+        }
+        function randomColor() {
+            const accent = colorPicker.value || '#4963e6';
+            const palette = [accent, '#ffcc00', '#ff6b6b', '#4ee1b3', '#7c5cff'];
+            return palette[Math.floor(Math.random()*palette.length)];
+        }
+
+        // celebration count
+        function incrementCount(){
+            const k = 'birthday_count';
+            const n = parseInt(localStorage.getItem(k) || '0', 10) + 1;
+            localStorage.setItem(k, String(n));
+            return n;
+        }
+
+        // grammar-safe message
+        function makeMessage(name, age, emoji) {
+            const compliment = compliments[Math.floor(Math.random()*compliments.length)];
+            const count = incrementCount();
+            const cake = `<span class="cake">${emoji}</span>`;
+            return `${cake} Hey ${escapeHtml(name)} — happy ${escapeHtml(age)}! ${compliment} (Celebrated: ${count}×)`;
+        }
+
+        // small escape
+        function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' })[c]); }
+
+        // submit
+        form.addEventListener('submit', (e)=>{
+            e.preventDefault();
+            const name = nameInput.value.trim();
+            const age = ageInput.value.trim();
+            if(!name || !age) {
+                resultDiv.style.display='block';
+                resultDiv.textContent = 'Please enter your name and age.';
+                return;
+            }
+            // save prefs
+            if(saveCheckbox.checked) {
+                localStorage.setItem('birthday_name', name);
+                localStorage.setItem('birthday_age', age);
+            } else {
+                localStorage.removeItem('birthday_name');
+                localStorage.removeItem('birthday_age');
+            }
+
+            // show result with small markup (safe)
+            const emoji = emojiSel.value || '🎉';
+            resultDiv.style.display='block';
+            resultDiv.innerHTML = makeMessage(name, age, emoji);
+
+            // pulse cake
+            const cakeEl = resultDiv.querySelector('.cake');
+            if(cakeEl){
+                cakeEl.classList.add('pulse');
+                setTimeout(()=> cakeEl.classList.remove('pulse'), 700);
+            }
+
+            // confetti + sound
+            burstConfetti(24);
+            if(soundCheckbox.checked) playChime();
+
+            // update preview after celebration
+            setTimeout(updatePreview, 600);
+        });
+
+        // update on load
+        updatePreview();
+        applyTheme(colorPicker.value);
+
+        // keyboard: Enter on age triggers submit
+        ageInput.addEventListener('keydown', (e)=>{
+            if(e.key === 'Enter') form.requestSubmit();
+        });
+    </script>
+</body>
+</html>
+// ...existing code...
